@@ -3,6 +3,8 @@ import pandas as pd
 from sklearn.preprocessing import StandardScaler
 from numpy.linalg import inv
 
+np.set_printoptions(suppress=True) 
+
 # Function for the mulitvariate linear regression
 # Y= B_0*x_0+ B_1*x_1+ ... + B_n*x_n + e 
 
@@ -32,24 +34,24 @@ def batch_gradient_descent(X, Y, B, alpha, iterations):
     return B, cost_history
 
 # for Matrix 
-def solve_betas(x,y): 
+def solve_betas(x,y):
     n,m = x.shape
     X0 = np.ones((n,1))
     Xnew = np.hstack((X0,x))
-    x_t = Xnew.T
-    x_t_x = np.matmul(x_t, Xnew)
-    x_t_x_i =  inv(x_t_x)
-    x_t_y = np.matmul(x_t, y)
-    return np.matmul(x_t_x_i, x_t_y)
+    x_t = Xnew.transpose()
+    x_t_x = np.dot(x_t, Xnew)
+    x_t_x_i =  np.linalg.inv(x_t_x)
+    x_t_y = np.dot(x_t, y)
+    return np.dot(x_t_x_i, x_t_y)
 
 # Use for both 
 def y_predict(B, x): 
     y_pred = []
-    for i in range(0, len(X)): 
-        cur = X[i]
+    for i in range(0, len(x)): 
+        cur = x[i]
         temp = Beta[0]
         for j in range(0, len(cur)):
-            temp += cur[j]*Beta[j+1]
+            temp += cur[j]*B[j+1]
         y_pred.append(temp)
     return y_pred
 
@@ -71,18 +73,21 @@ def r_sqaure(y, y_pred):
 
     return 1-(sum/sum2)
 
+
 # Test cases
 data = pd.read_excel('energy.xlsx')
 
 X = data.iloc[:,:4]
 y = data.iloc[:,-1]
 
-Beta = solve_betas(X,y)
-print(Beta)
+print(X)
+print(y)
 
 #using gradient descent 
 sc = StandardScaler()
 X = sc.fit_transform(X)
+Beta = solve_betas(X,y)
+print(Beta)
 
 m = 7000
 f = 4
@@ -101,8 +106,12 @@ newB, cost_history = batch_gradient_descent(X_train, y_train, B, alpha, iter_)
 
 print(newB)
 
-y_pred_equation = y_predict(Beta, y)
-y_pred_bgd= y_predict(newB, y)
+y_pred_equation = y_predict(Beta, X)
+y_pred_bgd= y_predict(newB, X)
 
 print(r_sqaure(y, y_pred_equation))
 print(r_sqaure(y,y_pred_bgd))
+
+
+   
+
